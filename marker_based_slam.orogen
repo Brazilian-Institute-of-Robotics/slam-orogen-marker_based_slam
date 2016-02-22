@@ -2,16 +2,15 @@ name "marker_based_slam"
 version "0.1"
 
 import_types_from "marker_based_slamTypes.hpp"
-import_types_from "aruco_detector/aruco_detectorTypes.hpp"
+import_types_from "base"
 
 using_library "marker_based_slam"
-using_task_library "aruco"
 
 
 task_context "Task" do
     needs_configuration
 
-    input_port "marker_poses", "std/vector<base::samples::RigidBodyState>"
+    input_port "marker_poses", "std/vector<base/samples/RigidBodyState>"
     
     output_port "relative_poses", "std/vector<marker_based_slam/RelativePoses>"
     output_port "camera_pose",  "std/vector<marker_based_slam/MapPose>"

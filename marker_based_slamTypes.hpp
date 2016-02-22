@@ -9,7 +9,7 @@
  */
 #include <base/samples/RigidBodyState.hpp>
 
-namespace marker_based_mapping {
+namespace marker_based_slam {
 
 struct RelativePoses{
     int pair1;
