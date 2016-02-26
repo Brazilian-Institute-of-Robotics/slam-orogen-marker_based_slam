@@ -53,14 +53,16 @@ void Task::updateHook()
         rbs = input[i];
         std::string str = input[i].targetFrame;
         
-        for (int i=9; i<str.size(); ++i)
+        for (int i=0; i<str.size(); ++i)
         {
-        	ss << str[i];
+            if(std::isdigit(str[i]))
+            {
+        	    ss << str[i];
+            }
         }
 
         int id = 0;
         ss >> id;
-
         rbs_input.insert(MarkerPose::value_type(id, rbs));
     } 
     /*Set the input values and calculate the relative pose between markers*/
