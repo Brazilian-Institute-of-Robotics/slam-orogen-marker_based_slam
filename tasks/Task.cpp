@@ -29,6 +29,10 @@ bool Task::configureHook()
     if (! TaskBase::configureHook())
         return false;
 
+    //initialize bool variable to avoid to compute the same map multiple
+    //times
+    map_is_build = false;
+
     return true;
 }
 bool Task::startHook()
@@ -48,7 +52,16 @@ void Task::updateHook()
 
     /*Set the input values and calculate the relative pose between markers*/
     mbslam.setPose(rbs_input);
-    mbslam.calculatePoses();
+
+    if (_known_map.get() & !map_is_build)
+    {
+        mbslam.getMapFromFile(_map_address.get());
+        map_is_build = true;
+    }
+    else if (!_known_map.get())
+    {
+        mbslam.calculatePoses();
+    }
 
     mbslam.printRelativePoses();
 
@@ -71,7 +84,7 @@ void Task::updateHook()
 
 
     input.clear();
-    relative_poses_output.clear();
+    if (_known_map.get()) relative_poses_output.clear();
     camera_pose_output.clear();
 }
 

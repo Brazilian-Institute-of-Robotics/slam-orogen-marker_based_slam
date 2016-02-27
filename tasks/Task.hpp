@@ -28,6 +28,7 @@ namespace marker_based_slam {
     {
 	friend class TaskBase;
     protected:
+    bool map_is_build;
 	marker_based_slam::MarkerBasedSlam mbslam;
 
     /*Transform RigidBodyState to marker_based_slam::MarkerPose*/
