@@ -40,10 +40,58 @@ bool Task::startHook()
 void Task::updateHook()
 {
     TaskBase::updateHook();
-    /*Reading from input port*/
-    _marker_poses.read(input);
 
+    /*Reading from input port*/
+    std::vector<base::samples::RigidBodyState> input;
+    _marker_poses.read(input);
+    MarkerPose rbs_input = rbsToMarkerPose(input);
+
+    /*Set the input values and calculate the relative pose between markers*/
+    mbslam.setPose(rbs_input);
+    mbslam.calculatePoses();
+
+    mbslam.printRelativePoses();
+
+    /*Convert RelativePoses to std::vector<RelativeMarkerPoses>*/
+    RelativePoses all_relative_poses = mbslam.getMap();
+    std::vector<RelativeMarkerPoses> relative_poses_output;
+    relative_poses_output = RelativePosesToRelativeMarkerPoses(all_relative_poses);
+    
+    /*Get the Camera(s) Pose(s)
+    /*Transform MarkerPose to std::vector<MapPose>*/
+    MarkerPose camera_pose = mbslam.getCameraPose(); 
+    std::vector<MapPose> camera_pose_output = MarkerPoseToMapPose(camera_pose);
+    mbslam.printCameraPose(camera_pose);
+
+    
+
+    /*Write the relative poses and the camera pose in the output ports*/ 
+    _relative_poses.write(relative_poses_output);
+    _camera_pose.write(camera_pose_output); 
+
+
+    input.clear();
+    relative_poses_output.clear();
+    camera_pose_output.clear();
+}
+
+void Task::errorHook()
+{
+    TaskBase::errorHook();
+}
+void Task::stopHook()
+{
+    TaskBase::stopHook();
+}
+void Task::cleanupHook()
+{
+    TaskBase::cleanupHook();
+}
+
+MarkerPose Task::rbsToMarkerPose(std::vector<base::samples::RigidBodyState> input)
+{
     MarkerPose rbs_input;
+
     /*Converting to marker_based_slam::MarkerPose*/
     for (int i=0; i < input.size(); ++i )
     {
@@ -65,36 +113,33 @@ void Task::updateHook()
         ss >> id;
         rbs_input.insert(MarkerPose::value_type(id, rbs));
     } 
-    /*Set the input values and calculate the relative pose between markers*/
-    map.setPose(rbs_input);
-    map.calculatePoses();
 
-    map.printRelativePoses();
+    return rbs_input;
+}
 
-    /*Transform std::map<std::pair<int, int>, base::samples::RigidBodyState> to std::vector<marker_based_marker_based_slam::RelativePoses>*/
-    std::map<std::pair<int,int>, base::samples::RigidBodyState> all_relative_poses;
-    std::vector<RelativePoses> relative_poses_output;
-    
-    map.getMap(all_relative_poses);
-    
+std::vector<RelativeMarkerPoses> Task::RelativePosesToRelativeMarkerPoses(RelativePoses all_relative_poses)
+{
+    /*Transform RelativePoses to std::vector<RelativeMarkerPoses>*/
+    std::vector<RelativeMarkerPoses> relative_poses_output;
+
     for (RelativePosesIterator it = all_relative_poses.begin(); it != all_relative_poses.end(); ++it)
     {
-		RelativePoses temp;
+        RelativeMarkerPoses temp;
 
-		temp.pair1 = it->first.first;
-		temp.pair2 = it->first.second;
-		temp.rbs =   it->second;
+        temp.pair1 = it->first.first;
+        temp.pair2 = it->first.second;
+        temp.rbs =   it->second;
 
-		relative_poses_output.push_back(temp);
+        relative_poses_output.push_back(temp);
     }
-    
+
+    return relative_poses_output;
+}
+
+std::vector<MapPose> Task::MarkerPoseToMapPose(MarkerPose camera_pose)
+{
     /*Transform marker_based_slam::MarkerPose to std::vector<marker_based_slam::MapPose>*/
-    MarkerPose camera_pose;
     std::vector<MapPose> camera_pose_output;
-
-    map.getCameraPose(camera_pose); 
-    map.printCameraPose(camera_pose);
-
     for (MarkerPoseIterator it = camera_pose.begin(); it != camera_pose.end(); ++it)
     {
     	MapPose temp;
@@ -104,28 +149,8 @@ void Task::updateHook()
         camera_pose_output.push_back(temp);
 
     }
-    
 
-    /*Write the relative poses and the camera pose in the output ports*/ 
-    _relative_poses.write(relative_poses_output);
-    _camera_pose.write(camera_pose_output); 
-
-
-    input.clear();
-    relative_poses_output.clear();
-    camera_pose_output.clear();
+    return camera_pose_output;
 
 }
 
-void Task::errorHook()
-{
-    TaskBase::errorHook();
-}
-void Task::stopHook()
-{
-    TaskBase::stopHook();
-}
-void Task::cleanupHook()
-{
-    TaskBase::cleanupHook();
-}

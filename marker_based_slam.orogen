@@ -10,9 +10,23 @@ using_library "marker_based_slam"
 task_context "Task" do
     needs_configuration
 
+    #TRUE if you have a known map
+    property("known_map", "bool", false)
+
+    #Full map address
+    property("map_address", "std/string", "")
+
+
+
+
+    #A vector of all detected markers in the current image frame
     input_port "marker_poses", "std/vector<base/samples/RigidBodyState>"
     
-    output_port "relative_poses", "std/vector<marker_based_slam/RelativePoses>"
+    #A vector of transformations between the markers and the reference marker
+    #Group of markers that have no corelattion are build as a diffente map
+    output_port "relative_poses", "std/vector<marker_based_slam/RelativeMarkerPoses>"
+
+    #Camera's pose with respetc to the reference(s) marker(s)
     output_port "camera_pose",  "std/vector<marker_based_slam/MapPose>"
 	
     port_driven "marker_poses"

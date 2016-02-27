@@ -11,7 +11,7 @@
 
 namespace marker_based_slam {
 
-struct RelativePoses{
+struct RelativeMarkerPoses{
     int pair1;
     int pair2;
     base::samples::RigidBodyState rbs;

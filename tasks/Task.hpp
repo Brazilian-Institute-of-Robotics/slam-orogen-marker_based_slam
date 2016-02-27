@@ -28,8 +28,14 @@ namespace marker_based_slam {
     {
 	friend class TaskBase;
     protected:
-    std::vector<base::samples::RigidBodyState> input;
-	marker_based_slam::MarkerBasedSlam map;
+	marker_based_slam::MarkerBasedSlam mbslam;
+
+    /*Transform RigidBodyState to marker_based_slam::MarkerPose*/
+    MarkerPose rbsToMarkerPose(std::vector<base::samples::RigidBodyState> input);
+    /*Transform RelativePoses to std::vector<RelativeMarkerPoses>*/
+    std::vector<RelativeMarkerPoses> RelativePosesToRelativeMarkerPoses(RelativePoses all_relative_poses);
+    /*Transform marker_based_slam::MarkerPose to std::vector<marker_based_slam::MapPose>*/
+    std::vector<MapPose> MarkerPoseToMapPose(MarkerPose camera_pose);
     public:
         /** TaskContext constructor for Task
          * \param name Name of the task. This name needs to be unique to make it identifiable via nameservices.
