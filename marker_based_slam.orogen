@@ -16,7 +16,13 @@ task_context "Task" do
     #Full map address
     property("map_address", "std/string", "")
 
+    #Transformation between the camera and the robot frame (cHr)
+    #the translation parameters in meters and angular in degrees
+    property("camera2robot", "marker_based_slam/PoseTransformation")
 
+    #Transformation between the world and the marker frame (wHm)
+    #the translation parameters in meters and angular in degrees
+    property("world2marker", "marker_based_slam/PoseTransformation")
 
 
     #A vector of all detected markers in the current image frame

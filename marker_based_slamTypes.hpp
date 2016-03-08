@@ -22,6 +22,16 @@ struct MapPose{
     base::samples::RigidBodyState rbs;
 };
 
+struct PoseTransformation
+{
+    double x;
+    double y;
+    double z;
+    double rot_x;
+    double rot_y;
+    double rot_z;
+};
+
 }
 
 #endif

@@ -1,6 +1,7 @@
 /* Generated from orogen/lib/orogen/templates/tasks/Task.cpp */
 
 #include "Task.hpp"
+#include <marker_based_slam/MapParser.hpp>
 
 using namespace marker_based_slam;
 
@@ -55,7 +56,7 @@ void Task::updateHook()
 
     if (_known_map.get() & !map_is_build)
     {
-        mbslam.getMapFromFile(_map_address.get());
+        mbslam.getMapFromFile(_map_address.get(), PoseTransformationToRbs(_world2marker.get()));
         map_is_build = true;
     }
     else if (!_known_map.get())
@@ -72,16 +73,14 @@ void Task::updateHook()
     
     /*Get the Camera(s) Pose(s)
     /*Transform MarkerPose to std::vector<MapPose>*/
-    MarkerPose camera_pose = mbslam.getCameraPose(); 
+    base::samples::RigidBodyState camera2robot = PoseTransformationToRbs(_camera2robot.get());
+    MarkerPose camera_pose = mbslam.getCameraPose(camera2robot); 
     std::vector<MapPose> camera_pose_output = MarkerPoseToMapPose(camera_pose);
     mbslam.printCameraPose(camera_pose);
-
-    
 
     /*Write the relative poses and the camera pose in the output ports*/ 
     _relative_poses.write(relative_poses_output);
     _camera_pose.write(camera_pose_output); 
-
 
     input.clear();
     if (_known_map.get()) relative_poses_output.clear();
@@ -130,6 +129,22 @@ MarkerPose Task::rbsToMarkerPose(std::vector<base::samples::RigidBodyState> inpu
     return rbs_input;
 }
 
+base::samples::RigidBodyState Task::PoseTransformationToRbs(PoseTransformation trans)
+{
+    base::samples::RigidBodyState rbs;
+
+    rbs.position[0] = trans.x;
+    rbs.position[1] = trans.y;
+    rbs.position[2] = trans.z;
+
+    rbs.orientation = MapParser::getQuaternionFromAxisAngle(trans.rot_x*M_PI/180, 
+        trans.rot_y*M_PI/180, 
+        trans.rot_z*M_PI/180);
+
+    return rbs;
+
+
+}
 std::vector<RelativeMarkerPoses> Task::RelativePosesToRelativeMarkerPoses(RelativePoses all_relative_poses)
 {
     /*Transform RelativePoses to std::vector<RelativeMarkerPoses>*/

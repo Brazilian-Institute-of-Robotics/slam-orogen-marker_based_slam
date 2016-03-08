@@ -37,6 +37,7 @@ namespace marker_based_slam {
     std::vector<RelativeMarkerPoses> RelativePosesToRelativeMarkerPoses(RelativePoses all_relative_poses);
     /*Transform marker_based_slam::MarkerPose to std::vector<marker_based_slam::MapPose>*/
     std::vector<MapPose> MarkerPoseToMapPose(MarkerPose camera_pose);
+    base::samples::RigidBodyState PoseTransformationToRbs(PoseTransformation trans);
     public:
         /** TaskContext constructor for Task
          * \param name Name of the task. This name needs to be unique to make it identifiable via nameservices.
